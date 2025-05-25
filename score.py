@@ -76,7 +76,18 @@ class scoreKeeper:
                 self.sorted_racers = self.sortRacers(0)
 
             self.racers[input].setLastSeen(current_time)   
-                    
+    
+    def manualLapDone(self, input):
+        if input in self.racernames and self.in_progress:
+            input = self.racernames.index(input)
+
+            if self.in_progress:
+                current_time = time.time()
+                self.racers[input].lap(current_time)
+                self.sorted_racers = self.sortRacers(0)
+
+            self.racers[input].setLastSeen(current_time)  
+                      
     def getLapTime(self, input):
         if input in self.racernames:
             input = self.racernames.index(input)
@@ -104,7 +115,7 @@ class scoreKeeper:
                     else:
                         minutes, seconds = divmod(int(time), 60)
                         minutes = divmod(minutes, 60)[1]
-                        lap_times += (f"{minutes:02}:{seconds:02}, ")
+                        lap_times += (f"{minutes:02}:{seconds:02} ({time}), ")
                 
                 file.write(f"{racer.getName()}, {lap_times}\n")
 
@@ -139,6 +150,11 @@ class scoreKeeper:
         
     def getSortedRacers(self):
         return self.sorted_racers
+
+    def startAllRacers(self):
+        for racer in self.racers:
+            racer.lap(time.time())
+            racer.setLastSeen(time.time())
 
 class racer:
     def __init__ (self, name, lapCount):

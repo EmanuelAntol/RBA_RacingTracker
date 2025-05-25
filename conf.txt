@@ -1,0 +1,4 @@
+TEAMS=5, Team D, Team E, Team F, Team G, Team H
+LAPS=3
+COOLDOWN=5
+SAVENAME=test.csv
