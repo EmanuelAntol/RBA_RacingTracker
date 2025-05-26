@@ -77,8 +77,19 @@ def Panels():
     input_text_listbox = ttk.Combobox(text_frame, values=teams, width=20)
     input_text_listbox.pack(pady=10, side=tk.LEFT, padx=10)
     input_text_listbox.set("Select Racer")
-    input_text_listbox.bind("<Return>", lambda event: keeper.manualLapDone(input_text_listbox.get()))
-
+    try:
+        controlPanel.bind(f"1", lambda event: keeper.manualLapDone(teams[0]))
+        controlPanel.bind(f"2", lambda event: keeper.manualLapDone(teams[1]))
+        controlPanel.bind(f"3", lambda event: keeper.manualLapDone(teams[2]))
+        controlPanel.bind(f"4", lambda event: keeper.manualLapDone(teams[3]))
+        controlPanel.bind(f"5", lambda event: keeper.manualLapDone(teams[4]))
+        controlPanel.bind(f"6", lambda event: keeper.manualLapDone(teams[5]))
+        controlPanel.bind(f"7", lambda event: keeper.manualLapDone(teams[6]))
+        controlPanel.bind(f"8", lambda event: keeper.manualLapDone(teams[7]))
+        controlPanel.bind(f"9", lambda event: keeper.manualLapDone(teams[8]))
+        controlPanel.bind(f"0", lambda event: keeper.manualLapDone(teams[9]))
+    except IndexError:
+        pass
 
     enter_button = ttk.Button(text_frame, text="Enter", command=lambda: keeper.manualLapDone(input_text_listbox.get()))
     enter_button.pack(pady=10, side=tk.RIGHT, padx=10)
@@ -203,8 +214,13 @@ def capture_toggle():
 
 def save_results():
     global savename, saved
-    keeper.saveResults(savename)
-    saved = True
+    try:
+        keeper.saveResults(savename)
+        saved = True
+        print("Saved results to", savename)
+    except Exception as e:
+        print("Error saving results:", e)
+        saved = False
 
 try:
     keeper = score.scoreKeeper(teams, cooldown, laps)
