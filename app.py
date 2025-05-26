@@ -9,6 +9,7 @@ start_time = 0
 elapsed_time = 0
 qr_detector = None
 saved = True
+paused = False
 cooldown = 5
 laps = 3
 teams = ["Team A", "Team B", "Team C"]
@@ -149,14 +150,15 @@ def start_timer():
         update_score()
 
 def pause_timer():
-    global running, start_time, elapsed_time
+    global running, start_time, elapsed_time, paused
     
     if running == True:
         running = False
+        paused = True
         elapsed_time = time.time() - start_time
         pause_button.config(text="Resume")
         keeper.racePauseTimer()
-    elif elapsed_time > 0:
+    elif elapsed_time > 0 and paused == True:
         running = True
         start_time = time.time() - elapsed_time
         pause_button.config(text="Pause")
@@ -164,15 +166,21 @@ def pause_timer():
         update()
     
 def reset_timer():
-    global start_time, running, elapsed_time
+    global start_time, running, elapsed_time, saved
+    if not saved:
+        keeper.saveResults("ResetAutosave.csv")
     running = False
+    saved = True
     timer_label1.config(text="00:00")
     timer_label2.config(text="00:00")
     pause_button.config(text="Pause")
     start_button.config(text="Start")
+    
     elapsed_time = 0
     start_time = 0
     keeper.reset()
+    team_list.config(text = "")
+    
     
 def capture_toggle():
     import reader
