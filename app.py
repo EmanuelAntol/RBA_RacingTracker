@@ -48,6 +48,9 @@ def Panels():
     button_frame = ttk.Frame(controlPanel)
     button_frame.pack(pady=10, side=tk.BOTTOM, fill=tk.X, padx=10)
 
+    team_List_frame = ttk.Frame(controlPanel)
+    team_List_frame.pack(pady=5, side=tk.BOTTOM, fill=tk.X)
+
     
     
     start_button = ttk.Button(button_frame, text="Start", command=lambda: start_timer())
@@ -77,6 +80,7 @@ def Panels():
     input_text_listbox = ttk.Combobox(text_frame, values=teams, width=20)
     input_text_listbox.pack(pady=10, side=tk.LEFT, padx=10)
     input_text_listbox.set("Select Racer")
+    input_text_listbox.bind("<Return>", lambda event: keeper.manualLapDone(input_text_listbox.get()))
     try:
         controlPanel.bind(f"1", lambda event: keeper.manualLapDone(teams[0]))
         controlPanel.bind(f"2", lambda event: keeper.manualLapDone(teams[1]))
@@ -90,10 +94,16 @@ def Panels():
         controlPanel.bind(f"0", lambda event: keeper.manualLapDone(teams[9]))
     except IndexError:
         pass
-
     enter_button = ttk.Button(text_frame, text="Enter", command=lambda: keeper.manualLapDone(input_text_listbox.get()))
     enter_button.pack(pady=10, side=tk.RIGHT, padx=10)
     
+    teamidString = ""
+    for i, team in enumerate(teams):
+        teamidString += f"{(i+1)%10}: {team}\n"
+    team_list_label = ttk.Label(team_List_frame, text=teamidString, font=("Segoe UI", 15))
+    team_list_label.pack(pady=1, side=tk.BOTTOM, padx=10)
+
+
 
     timer_label2 = ttk.Label(scorePanel, text="00:00", font=("Segoe UI", 30))
     timer_label2.pack(pady=20)
