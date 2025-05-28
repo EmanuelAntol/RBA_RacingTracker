@@ -16,6 +16,7 @@ teams = ["Team A", "Team B", "Team C"]
 savename = "score.csv"
 
 
+
 try :
     with open("conf.txt", "r") as f:
         lines = f.readlines()
@@ -34,7 +35,7 @@ except:
 
 
 def Panels():
-    global controlPanel, begin_with_start, scorePanel, timer_label1, timer_label2, team_list, start_button, pause_button, capture_button, save_button, enter_button, input_text_listbox, teams
+    global controlPanel, begin_with_start, scorePanel, timer_label1, timer_label2, team_list, start_button, pause_button, capture_button, save_button, enter_button, input_text_listbox, teams, time_list, lap_list
     controlPanel = tk.Tk()
     controlPanel.title("Racing control panel")
     controlPanel.resizable(False, False)
@@ -73,14 +74,14 @@ def Panels():
     save_button = ttk.Button(button_frame, text="Save", command=lambda: save_results())
     save_button.grid(row=2, column=1, pady=5, padx= 5, sticky="ew")
     
-    timer_label1 = ttk.Label(controlPanel, text="00:00", font=("Segoe UI", 30))
+    timer_label1 = ttk.Label(controlPanel, text="00:00", font=("Anonymous Pro", 30))
     timer_label1.pack(pady=20)
 
     
     input_text_listbox = ttk.Combobox(text_frame, values=teams, width=20)
     input_text_listbox.pack(pady=10, side=tk.LEFT, padx=10)
     input_text_listbox.set("Select Racer")
-    input_text_listbox.bind("<Return>", lambda event: keeper.manualLapDone(input_text_listbox.get()))
+    
     try:
         controlPanel.bind(f"1", lambda event: keeper.manualLapDone(teams[0]))
         controlPanel.bind(f"2", lambda event: keeper.manualLapDone(teams[1]))
@@ -92,27 +93,37 @@ def Panels():
         controlPanel.bind(f"8", lambda event: keeper.manualLapDone(teams[7]))
         controlPanel.bind(f"9", lambda event: keeper.manualLapDone(teams[8]))
         controlPanel.bind(f"0", lambda event: keeper.manualLapDone(teams[9]))
-    except IndexError:
+    except:
         pass
+    
     enter_button = ttk.Button(text_frame, text="Enter", command=lambda: keeper.manualLapDone(input_text_listbox.get()))
     enter_button.pack(pady=10, side=tk.RIGHT, padx=10)
     
     teamidString = ""
     for i, team in enumerate(teams):
         teamidString += f"{(i+1)%10}: {team}\n"
-    team_list_label = ttk.Label(team_List_frame, text=teamidString, font=("Segoe UI", 15))
+    team_list_label = ttk.Label(team_List_frame, text=teamidString, font=("Anonymous Pro", 15))
     team_list_label.pack(pady=1, side=tk.BOTTOM, padx=10)
 
+    scorePanel.geometry("1920x1080")
 
-
-    timer_label2 = ttk.Label(scorePanel, text="00:00", font=("Segoe UI", 30))
-    timer_label2.pack(pady=20)
-
-
-    team_list = ttk.Label(scorePanel, text="", font=("Segoe UI", 30))
-    team_list.pack(pady=20)
     
 
+
+    team_list = ttk.Label(scorePanel, text="HEHE", font=("Anonymous Pro", 50))
+    team_list.place(in_ = scorePanel, anchor= "nw", relx=0.05, rely= 0.05, relheight= 0.9, relwidth= 0.26)
+
+    time_list = ttk.Label(scorePanel, text="HUHU", font=("Anonymous Pro", 50))
+    time_list.place(in_ = scorePanel, anchor= "nw", relx=0.36, rely= 0.05, relheight= 0.9, relwidth= 0.26)
+
+    lap_list = ttk.Label(scorePanel, text="HAHA", font=("Anonymous Pro", 50))
+    lap_list.place(in_ = scorePanel, anchor= "nw", relx=0.67, rely= 0.05, relheight= 0.9, relwidth= 0.26)
+
+    timer_label2 = ttk.Label(scorePanel, text="00:00", font=("Anonymous Pro", 100))
+    timer_label2.pack(pady=20)
+
+    
+    update_score()
     controlPanel.mainloop()
 
 def update():
@@ -128,18 +139,31 @@ def update():
         controlPanel.after(10, update)
 
 def update_score():
-    elapsed_time = time.time() - start_time
+    global standard_lenght
+    elapsed_time = 0
+    if start_time != 0:
+        elapsed_time = time.time() - start_time
     minutes, seconds = divmod(int(elapsed_time), 60)
     minutes = divmod(minutes, 60)[1]
     timer_label1.config(text=f"{minutes:02}:{seconds:02}")
     timer_label2.config(text=f"{minutes:02}:{seconds:02}")
 
-    temp_text = ""
+    temp_text = [f"{'Názov tímu':^20}\n", f"{'Poč. kôl':^20}\n", f"{'Celkový čas':^20} \n"]
+    
     for racer in keeper.getSortedRacers():
         minutes, seconds = divmod(int(racer.getTotalTime()), 60)
         minutes = divmod(minutes, 60)[1]
-        temp_text += f"{racer.getName()}: {minutes:02}:{seconds:02}\n"
-    team_list.config(text = temp_text)
+        text_name = f"{racer.getName()}"
+        text_time = f"{minutes:02}:{seconds:02}"
+        text_laps = f"{racer.lapsDoneCount()}"
+        
+        temp_text[0] += (f"{text_name:^20} \n")
+        temp_text[1] += (f"{text_laps:^20} \n")
+        temp_text[2] += (f"{text_time:^20} \n")
+
+    team_list.config(text = temp_text[0])
+    lap_list.config(text = temp_text[1])
+    time_list.config(text = temp_text[2])
 
 def capture_update():
     global capture
@@ -200,8 +224,7 @@ def reset_timer():
     elapsed_time = 0
     start_time = 0
     keeper.reset()
-    team_list.config(text = "")
-    
+    update_score()
     
 def capture_toggle():
     import reader
