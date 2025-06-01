@@ -3,6 +3,8 @@ import tkinter as tk
 from tkinter import ttk
 import time
 
+
+runServer: bool = False
 capture = False
 running = False
 start_time = 0
@@ -14,6 +16,7 @@ cooldown = 5
 laps = 3
 teams = ["Team A", "Team B", "Team C"]
 savename = "score.csv"
+shutdown_token = "HARDCODED_TOKEN"
 
 
 
@@ -30,6 +33,10 @@ try :
                 teams = [team.strip() for team in teams]
             elif line.startswith("SAVENAME"):
                 savename = line.split("=")[1].strip()
+            elif line.startswith("SERVER"):
+                runServer = line.split("=")[1].strip().lower() == "true"
+            elif line.startswith("TOKEN"):
+                shutdown_token = line.split("=")[1].strip()
 except:
     pass               
 
@@ -255,7 +262,32 @@ def save_results():
         print("Error saving results:", e)
         saved = False
 
+def run_server():
+    try:
+        import flask
+        flask_app = flask.Flask(__name__)
+        @flask_app.route('/')
+        def index():
+            return "RBA Timekeeping Server is running!"
+        @flask_app.route('/results')
+        def results():
+            output = {}
+            for racer in keeper.getSortedRacers():
+                output[racer.getName()] = [0, 0]  # [laps_done, total_time]
+                output[racer.getName()][0] = racer.lapsDoneCount()
+                output[racer.getName()][1] = round(racer.getTotalTime(), 2)
+                #output[racer.getName()] = f"Laps: {racer.lapsDoneCount()}, Time: {round(racer.getTotalTime(), 2)}"
+            return flask.jsonify(output)
+        flask_app.run(host="0.0.0.0", port=80)
+
+    
+
 try:
+    if runServer:
+        import threading
+        server_thread = threading.Thread(target=run_server)
+        server_thread.start()
+        print("Server started")
     keeper = score.scoreKeeper(teams, cooldown, laps)
     Panels()
 finally:

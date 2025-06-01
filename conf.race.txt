@@ -2,3 +2,4 @@ TEAMS=1, 2, 3, 4, 5, 6, 7, 8, 9, 10
 LAPS=8
 COOLDOWN=15
 SAVENAME=groupA.csv
+SERVER=true

@@ -2,3 +2,4 @@ TEAMS=1, 2
 LAPS=3
 COOLDOWN=15
 SAVENAME=qual1.csv
+SERVER=false
